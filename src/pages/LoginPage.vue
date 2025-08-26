@@ -17,6 +17,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { LoginService } from "./service/LoginService";
 
 const id = ref("");
 const password = ref("");
@@ -33,14 +34,14 @@ const login = async () => {
       username: id.value,
       password: password.value,
     });
+    alert("로그인 성공ㅋㅅㅋ");
     router.push("/main");
-  } catch (e) {
+  } catch (error) {
     confirm("로그인 실패");
-    console.log("error", e);
+    console.log("error", error);
   }
 };
 
-//회원가입 페이지로 이동
 const signup = () => {
   router.push("/signup");
 };
