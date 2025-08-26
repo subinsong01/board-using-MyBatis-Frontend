@@ -1,4 +1,4 @@
-// Plugins
+// Vuetify 세팅 모아둔 곳
 import { registerPlugins } from "@/plugins";
 import App from "./App.vue";
 import { createApp } from "vue";
