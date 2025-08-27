@@ -1,8 +1,8 @@
 <template>
   <v-card width="100%">
-    <v-card-title>오늘의 소비 📝</v-card-title>
-
+    <v-card-title class="mt-3">오늘의 소비 📝</v-card-title>
     <v-card-actions class="d-flex justify-end">
+      <v-btn color="primary" @click="logout">로그아웃</v-btn>
       <v-btn color="primary" @click="dialog = true">추가</v-btn>
     </v-card-actions>
 
@@ -28,11 +28,14 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import Calendar from "@/components/Calendar.vue";
+import { LoginService } from "./service/LoginService";
+import { useRouter } from "vue-router";
 
 // 다이얼로그 상태
 const dialog = ref(false);
 const amount = ref<number | null>(null);
 const note = ref("");
+const router = useRouter();
 
 // 캘린더에 표시할 이벤트 목록
 const events = ref<any[]>([]);
@@ -53,4 +56,15 @@ function saveExpense() {
   note.value = "";
   dialog.value = false;
 }
+
+const logout = async () => {
+  try {
+    await LoginService.logout();
+    alert("성공적으로 로그아웃 되었습니다.");
+    router.push("/");
+  } catch (error) {
+    console.error("로그아웃 실패", error);
+    alert("로그아웃 중 오류가 발생했습니다.");
+  }
+};
 </script>
