@@ -9,7 +9,7 @@
         label="View Mode"
         variant="outlined"
         hide-details
-      ></v-select>
+      />
       <v-select
         v-model="weekday"
         :items="weekdays"
@@ -18,92 +18,89 @@
         label="weekdays"
         variant="outlined"
         hide-details
-      ></v-select>
+      />
     </v-sheet>
+
     <v-sheet>
       <v-calendar
         ref="calendar"
+        class="ml-3 mr-3"
         v-model="value"
         :events="events"
         :view-mode="type"
         :weekdays="weekday"
-      ></v-calendar>
+        @click:date="onDateClick"
+        @click:day="onDateClick"
+      />
     </v-sheet>
+
+    <!-- 팝업 -->
+    <Popup v-model:open="dialog" :date="selectedDate" @save="onSaveFromPopup" />
   </div>
 </template>
-<script>
-import { useDate } from "vuetify";
 
-export default {
-  data: () => ({
-    type: "month",
-    types: [
-      { title: "월간", value: "month" },
-      { title: "주간", value: "week" },
-      { title: "일간", value: "day" },
-    ],
-    weekday: [0, 1, 2, 3, 4, 5, 6],
-    weekdays: [
-      { title: "일 ~ 토", value: [0, 1, 2, 3, 4, 5, 6] },
-      { title: "월 ~ 일", value: [1, 2, 3, 4, 5, 6, 0] },
-      { title: "월 ~ 금", value: [1, 2, 3, 4, 5] },
-      { title: "월, 수, 금", value: [1, 3, 5] },
-    ],
+<script setup lang="ts">
+import { ref } from "vue";
+import Popup from "./Popup.vue";
 
-    value: [new Date()],
-    events: [],
-    colors: ["파랑", "남색", "보라", "청록", "초록", "주황", "회색"],
-    titles: [
-      "회의",
-      "휴일",
-      "연차",
-      "출장",
-      "이벤트",
-      "생일",
-      "컨퍼런스",
-      "파티",
-    ],
-  }),
-  mounted() {
-    const adapter = useDate();
-    this.getEvents({
-      start: adapter.startOfDay(adapter.startOfMonth(new Date())),
-      end: adapter.endOfDay(adapter.endOfMonth(new Date())),
-    });
-  },
-  methods: {
-    getEvents({ start, end }) {
-      const events = [];
+const props = defineProps<{ events: any[] }>();
+const emit = defineEmits(["save"]);
 
-      const min = start;
-      const max = end;
-      const days = (max.getTime() - min.getTime()) / 86400000;
-      const eventCount = this.rnd(days, days + 20);
+const type = ref("month");
+const types = [
+  { title: "월간", value: "month" },
+  { title: "주간", value: "week" },
+  { title: "일간", value: "day" },
+];
+const weekday = ref([0, 1, 2, 3, 4, 5, 6]);
+const weekdays = [
+  { title: "일 ~ 토", value: [0, 1, 2, 3, 4, 5, 6] },
+  { title: "월 ~ 일", value: [1, 2, 3, 4, 5, 6, 0] },
+  { title: "월 ~ 금", value: [1, 2, 3, 4, 5] },
+  { title: "월, 수, 금", value: [1, 3, 5] },
+];
 
-      for (let i = 0; i < eventCount; i++) {
-        const allDay = this.rnd(0, 3) === 0;
-        const firstTimestamp = this.rnd(min.getTime(), max.getTime());
-        const first = new Date(firstTimestamp - (firstTimestamp % 900000));
-        const secondTimestamp = this.rnd(2, allDay ? 288 : 8) * 900000;
-        const second = new Date(first.getTime() + secondTimestamp);
+const value = ref([new Date()]);
+const dialog = ref(false);
+const selectedDate = ref<Date | null>(null);
 
-        events.push({
-          title: this.titles[this.rnd(0, this.titles.length - 1)],
-          start: first,
-          end: second,
-          color: this.colors[this.rnd(0, this.colors.length - 1)],
-          allDay: !allDay,
-        });
-      }
+function onDateClick(payload: any) {
+  const target =
+    payload?.target || payload?.currentTarget || payload?.srcElement;
+  let dateToUse: Date | null = null;
 
-      this.events = events;
-    },
-    getEventColor(event) {
-      return event.color;
-    },
-    rnd(a, b) {
-      return Math.floor((b - a + 1) * Math.random()) + a;
-    },
-  },
-};
+  if (target?.textContent) {
+    const dayText = target.textContent.trim();
+    const dayNumber = parseInt(dayText);
+
+    if (!isNaN(dayNumber) && dayNumber >= 1 && dayNumber <= 31) {
+      const currentDisplayDate = value.value[0] || new Date();
+      dateToUse = new Date(
+        currentDisplayDate.getFullYear(),
+        currentDisplayDate.getMonth(),
+        dayNumber
+      );
+    }
+  }
+
+  if (dateToUse && !isNaN(dateToUse.getTime())) {
+    selectedDate.value = dateToUse;
+    dialog.value = true;
+  } else {
+    console.error("날짜 추출 실패");
+    alert("날짜를 인식할 수 없습니다.");
+  }
+}
+
+function onSaveFromPopup({
+  amount,
+  note,
+  date,
+}: {
+  amount: number;
+  note: string;
+  date: Date;
+}) {
+  emit("save", { amount, note, date });
+}
 </script>
