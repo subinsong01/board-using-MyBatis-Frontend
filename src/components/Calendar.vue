@@ -43,6 +43,7 @@
 import { ref } from "vue";
 import Popup from "./Popup.vue";
 import { ExpenseService } from "@/pages/service/ExpenseService";
+import { formatDate } from "@/utils/date";
 
 const props = defineProps({ events: Array });
 const emit = defineEmits(["save"]);
@@ -65,7 +66,6 @@ const value = ref([new Date()]);
 const dialog = ref(false);
 const selectedDate = ref(null);
 
-// 👉 팝업에서 입력받은 값 넘겨받을 때
 async function onSaveFromPopup({ amount, note }) {
   if (!selectedDate.value) {
     console.error("선택된 날짜 없음");
@@ -74,10 +74,12 @@ async function onSaveFromPopup({ amount, note }) {
   }
 
   try {
+    const spendDate = formatDate(selectedDate.value);
+
     const saved = await ExpenseService.create({
       amount,
       note,
-      spendDate: selectedDate.value.toISOString().split("T")[0],
+      spendDate,
     });
 
     props.events.push({
@@ -88,15 +90,14 @@ async function onSaveFromPopup({ amount, note }) {
       color: "blue",
     });
 
-    // MainPage.vue로 이벤트 전달
     emit("save", {
       amount,
       note,
       date: selectedDate.value,
     });
-  } catch (e) {
-    console.error("지출 저장 실패", e);
-    alert("저장 실패 😢");
+  } catch (error) {
+    console.error("지출 저장 실패", error);
+    alert("저장 실패");
   }
 }
 
