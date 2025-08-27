@@ -39,11 +39,12 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref } from "vue";
 import Popup from "./Popup.vue";
+import { ExpenseService } from "@/pages/service/ExpenseService";
 
-const props = defineProps<{ events: any[] }>();
+const props = defineProps({ events: Array });
 const emit = defineEmits(["save"]);
 
 const type = ref("month");
@@ -62,12 +63,47 @@ const weekdays = [
 
 const value = ref([new Date()]);
 const dialog = ref(false);
-const selectedDate = ref<Date | null>(null);
+const selectedDate = ref(null);
 
-function onDateClick(payload: any) {
+// 👉 팝업에서 입력받은 값 넘겨받을 때
+async function onSaveFromPopup({ amount, note }) {
+  if (!selectedDate.value) {
+    console.error("선택된 날짜 없음");
+    alert("날짜를 먼저 선택해주세요.");
+    return;
+  }
+
+  try {
+    const saved = await ExpenseService.create({
+      amount,
+      note,
+      spendDate: selectedDate.value.toISOString().split("T")[0],
+    });
+
+    props.events.push({
+      title: `지출 ₩${amount.toLocaleString()}${note ? ` - ${note}` : ""}`,
+      start: selectedDate.value,
+      end: selectedDate.value,
+      allDay: true,
+      color: "blue",
+    });
+
+    // MainPage.vue로 이벤트 전달
+    emit("save", {
+      amount,
+      note,
+      date: selectedDate.value,
+    });
+  } catch (e) {
+    console.error("지출 저장 실패", e);
+    alert("저장 실패 😢");
+  }
+}
+
+function onDateClick(payload) {
   const target =
     payload?.target || payload?.currentTarget || payload?.srcElement;
-  let dateToUse: Date | null = null;
+  let dateToUse = null;
 
   if (target?.textContent) {
     const dayText = target.textContent.trim();
@@ -90,17 +126,5 @@ function onDateClick(payload: any) {
     console.error("날짜 추출 실패");
     alert("날짜를 인식할 수 없습니다.");
   }
-}
-
-function onSaveFromPopup({
-  amount,
-  note,
-  date,
-}: {
-  amount: number;
-  note: string;
-  date: Date;
-}) {
-  emit("save", { amount, note, date });
 }
 </script>

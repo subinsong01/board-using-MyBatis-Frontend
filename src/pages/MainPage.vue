@@ -11,34 +11,45 @@
   </v-card>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted } from "vue";
 import Calendar from "@/components/Calendar.vue";
 import { LoginService } from "./service/LoginService";
 import { useRouter } from "vue-router";
+import { ExpenseService } from "./service/ExpenseService";
 
 const router = useRouter();
 const userId = ref("");
-const events = ref<any[]>([]);
+const events = ref([]);
 
 onMounted(async () => {
   try {
-    const user = await LoginService.getMyInfo();
+    const [user, expenses] = await Promise.all([
+      LoginService.getMyInfo(),
+      ExpenseService.list({
+        view: "month",
+        year: new Date().getFullYear(),
+        month: new Date().getMonth() + 1,
+      }),
+    ]);
+
     userId.value = user.username;
+
+    events.value = expenses.map((item) => ({
+      title: `지출 ₩${item.amount.toLocaleString()}${
+        item.note ? ` - ${item.note}` : ""
+      }`,
+      start: new Date(item.spendDate),
+      end: new Date(item.spendDate),
+      allDay: true,
+      color: "blue",
+    }));
   } catch (e) {
-    console.error("유저 정보 불러오기 실패", e);
+    console.error("데이터 불러오기 실패", e);
   }
 });
 
-function onSpendSave({
-  amount,
-  note,
-  date,
-}: {
-  amount: number;
-  note: string;
-  date: Date;
-}) {
+function onSpendSave({ amount, note, date }) {
   if (!(date instanceof Date) || isNaN(date.getTime())) {
     console.error("잘못된 날짜:", date);
     return;

@@ -2,7 +2,7 @@
   <v-dialog
     :model-value="open"
     @update:model-value="(v) => emit('update:open', v)"
-    max-width="420"
+    max-width="550"
   >
     <v-card>
       <v-card-title class="mt-5 ml-3">사용 금액 입력</v-card-title>
@@ -35,13 +35,16 @@
   </v-dialog>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { reactive, watch } from "vue";
 
-const props = defineProps<{ open: boolean; date: Date | null }>();
+const props = defineProps({
+  open: { type: Boolean, default: false },
+  date: { type: [Date, String, null], default: null },
+});
 const emit = defineEmits(["update:open", "save"]);
 
-const local = reactive({ amount: null as number | null, note: "" });
+const local = reactive({ amount: null, note: "" });
 
 watch(
   () => props.open,
