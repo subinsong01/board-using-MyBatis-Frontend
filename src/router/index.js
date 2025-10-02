@@ -1,7 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
-import MainPage from "@/pages/MainPage.vue";
 
-const routes = [{ path: "/", component: MainPage }];
+import BoardPage from "@/pages/BoardPage.vue";
+import BoardListPage from "@/pages/BoardListPage.vue";
+
+const routes = [
+  { path: "/", component: BoardPage },
+  { path: "/board/list", component: BoardListPage },
+];
 
 const router = createRouter({
   history: createWebHistory(),
