@@ -24,27 +24,33 @@
 
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 import { boardApi } from "@/features/main/BoardApi";
 
 const title = ref("");
 const content = ref("");
+const router = useRouter();
 
 const submitForm = async () => {
+  if ((title, (content = null))) {
+    alert("내용을 입력해주세요");
+  }
   try {
     const res = await boardApi.board({
       title: title.value,
       content: content.value,
     });
     window.alert("글이 성공적으로 등록되었습니다.");
+    router.push("/board/list");
   } catch (error) {
     console.error("res >> 게시판 생성 오류", error);
+    window.alert("등록에 실패했습니다.");
   }
   title.value = "";
   content.value = "";
 };
 
 const cancel = () => {
-  title.value = "";
-  content.value = "";
+  router.push("/board/list");
 };
 </script>
