@@ -1,15 +1,15 @@
 <template>
   <v-container>
     <v-card>
-      <v-card-title class="d-flex justify-space-between align-center">
-        <span>게시판</span>
-        <v-btn color="primary" @click="goToCreate">글 작성</v-btn>
+      <v-card-title
+        class="d-flex justify-space-between align-center text-h5 my-4"
+      >
+        <span>작성한 글 내역</span>
       </v-card-title>
 
       <v-card-text>
-        <!-- 검색 영역 -->
-        <v-row class="mb-4">
-          <v-col cols="12" md="4">
+        <v-row class="mb-2">
+          <v-col cols="8" md="10">
             <v-text-field
               v-model="searchTitle"
               label="제목 검색"
@@ -18,17 +18,17 @@
               clearable
             />
           </v-col>
-          <v-col cols="12" md="4">
-            <v-text-field
-              v-model="searchContent"
-              label="내용 검색"
-              outlined
-              dense
-              clearable
-            />
-          </v-col>
-          <v-col cols="12" md="4">
-            <v-btn color="primary" @click="searchBoard" block>검색</v-btn>
+
+          <v-col cols="12" md="2">
+            <v-btn
+              color="pink-lighten-3"
+              class="text-white"
+              @click="searchBoard"
+              block
+              size="x-large"
+            >
+              검색
+            </v-btn>
           </v-col>
         </v-row>
 
@@ -51,6 +51,10 @@
           </template>
         </v-data-table>
       </v-card-text>
+      <v-card-title class="d-flex justify-space-between align-center mb-3">
+        <v-spacer></v-spacer>
+        <v-btn color="pink-lighten-2" @click="goToCreate">글 작성</v-btn>
+      </v-card-title>
     </v-card>
   </v-container>
 </template>
@@ -68,7 +72,7 @@ const boardList = ref([]);
 const loading = ref(false);
 
 const headers = [
-  { title: "번호", key: "boardId", align: "center", width: "100" },
+  { title: "번호", key: "boardId", align: "left", width: "100" },
   { title: "제목", key: "title", align: "start" },
   { title: "작성일", key: "createdAt", align: "center", width: "200" },
 ];
@@ -92,10 +96,12 @@ const searchBoard = () => {
   fetchBoardList();
 };
 
+//글 작성
 const goToCreate = () => {
-  router.push("/board/create");
+  router.push("/");
 };
 
+//글 상세
 const goToDetail = (event, { item }) => {
   router.push(`/board/${item.boardId}`);
 };

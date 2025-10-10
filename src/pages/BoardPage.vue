@@ -32,8 +32,10 @@ const content = ref("");
 const router = useRouter();
 
 const submitForm = async () => {
-  if ((title, (content = null))) {
-    alert("내용을 입력해주세요");
+  //유효성 검사
+  if (!title.value || !content.value) {
+    alert("제목과 내용을 모두 입력해주세요.");
+    return;
   }
   try {
     const res = await boardApi.board({
